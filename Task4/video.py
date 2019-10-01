@@ -1,5 +1,18 @@
 #!/usr/bin/env python
 
+########################################################################
+# ECE180DA Lab 1 Header Comments
+# This baseline script originally displayed a video of the webcam's view.
+# I added changes to this baseline code by displaying only red objects that 
+# fall between an BGR range of [110,50,50] and [130,255,255]. 
+# These changes begin on line 204.
+# To do this, I first took the image captured by the VideoCapture and
+# converted it from BGR format to HSV. Using the HSV format, I used 
+# the opencv inRange function to generate a mask image of all the red
+# objects. I then used the opencv bitwise_and function to black out 
+# anything in the image that isn't within the BGR range.
+########################################################################
+
 # Python 2/3 compatibility
 from __future__ import print_function
 
@@ -184,14 +197,21 @@ if __name__ == '__main__':
 
     caps = list(map(create_capture, sources))
     shot_idx = 0
+
+    lower_red = np.array([110,50,50])
+    upper_red = np.array([130,255,255])
+
     while True:
         imgs = []
         for i, cap in enumerate(caps):
             ret, img = cap.read()
-            img = cv.rotate(img, 1)
-            img = (255-img)
-            imgs.append(img)
-            cv.imshow('capture %d' % i, img)
+            #######################################
+            hsv_format = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+            red_mask = cv.inRange(hsv_format, lower_red, upper_red)
+            result = cv.bitwise_and(img, img, mask = red_mask)
+            imgs.append(result)
+            cv.imshow('capture %d' % i, result)
+            ########################################
         ch = cv.waitKey(1)
         if ch == 27:
             break
